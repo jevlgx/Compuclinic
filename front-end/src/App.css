@@ -1,0 +1,99 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #646c7a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #2157c3;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.auth-main::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 400px;
+    height: 100%;
+    z-index: -1;
+    background: #8591a3;
+}
+.card::before {
+  width:150px;
+  padding: 5px
+}
+.body:after {
+    height: 5px;
+    width: 100%;
+    position: fixed;
+    content: '';
+    z-index: 999;
+}
+.auth-main:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    /* background: url(../../assets/images/auth_bg.jpg) no-repeat top left fixed; */
+}
+#wrapper:after {
+    right: 0;
+}
+#wrapper:before, #wrapper:after {
+    height: 100vh;
+    /* width: 5px; */
+    position: fixed;
+    content: '';
+    z-index: 999;
+    top: 0;
+}
+
+*, ::after, ::before {
+    box-sizing: border-box;
+}
+#wrapper:before {
+    left: 0;
+}
+.headerName {
+  font-size: 36px;
+  align-self: center;
+  text-align: center;
+}
+.headerContainer {
+  flex-direction: row;
+}
+
+.jvectormap-container{
+  height: 300px;
+}

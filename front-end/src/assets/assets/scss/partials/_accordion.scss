@@ -1,0 +1,27 @@
+.accordion{
+     .card {
+        background: #ffffff;
+        transition: .5s;
+        border: 0;
+         margin-bottom: 0px;
+        border-radius: 0.55rem;
+        position: relative;
+        margin: 0px;
+        width: 100%;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+    
+
+	.card-header{
+        @extend .padding-0;
+        .btn{
+            padding: 10px 20px;
+            width: 100%;
+            @extend .align-left;
+            font-size: 16px;
+        }
+    }
+
+    
+}
+
