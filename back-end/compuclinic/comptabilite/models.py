@@ -19,10 +19,7 @@ class Personne(models.Model):
 	adresse = models.CharField(max_length = 100)
 	commentaire = models.CharField(max_length = 100)
 	salaireDeBase = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
-	
-class Poste(models.Model):
-	nom = models.CharField(max_length = 20)
-	particularite  = models.CharField(max_length = 20)
+
 
 class Prime(models.Model):
 	type = models.CharField(max_length = 20)
@@ -35,7 +32,7 @@ class PrimeEmploye(models.Model):
 	date = models.DateField()
 	commentaire = models.CharField(max_length = 20)
 
-class Historique_paiementSalaire(models.Model):
+class HistoriquePaiementSalaire(models.Model):
 	matriculeEmploye = models.ForeignKey(Personne, on_delete=models.CASCADE)
 	sommePercue = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
 	date = models.DateField()
@@ -51,7 +48,7 @@ class Don(models.Model):
 	somme = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	destination = models.CharField(max_length = 20)
 
-class Don_Personne(models.Model):
+class DonPersonne(models.Model):
 	idDon = models.ForeignKey(Don, on_delete=models.CASCADE)
 	matriculeDonateur = models.ForeignKey(Personne, on_delete=models.CASCADE)
 
@@ -90,11 +87,11 @@ class Consultation(models.Model):
 	commentaires = models.CharField(max_length = 100)
 
 class HistoriqueConsultation(models.Model):
-	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
-	matriculeMedecin = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculePatient = models.ForeignKey(Personne,related_name='matriculePatientHistoriqueConsultation', on_delete=models.CASCADE)
+	matriculeMedecin = models.ForeignKey(Personne,related_name='matriculeMedecinHistoriqueConsultation', on_delete=models.CASCADE)
 	MatriculeConsultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
 	diagnostique = models.CharField(max_length = 1000)
-	date = models.DateField()
+	date = models.DateField() 
 
 class ChambreInternement(models.Model):
 	numeroChambre = models.IntegerField(primary_key=True ,validators=[MinValueValidator(0), MaxValueValidator(9999)])
