@@ -1,6 +1,3 @@
-from django.db import models
-
-# Create your models here.
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
@@ -185,8 +182,7 @@ class Materiel(models.Model):
 
 class Achat(models.Model):
 	motif = models.CharField(max_length = 20)
-	#000000 PROBLEME
-	#Matricule = models.ForeignKey(Materiel/Medicament, on_delete=models.CASCADE)
+	matriculeObjetAchete= models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	date = models.DateField()
 	prixTotal = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
@@ -194,42 +190,31 @@ class Achat(models.Model):
 
 class Stock(models.Model):
 	motif = models.CharField(max_length = 20)
-	#000000 PROBLEME
-	#Matricule = models.ForeignKey(Materiel/Medicament, on_delete=models.CASCADE)
+	matriculeObjetStocke= models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	datePeremption = models.DateField()
 	commentaire = models.CharField(max_length = 20)
-29)STOCK
-	-Id : int ai
-	#matricule medicament/Materiel
-	Quantité
-	Date peremtion
-	commentaire
-
-
-30)TRANSACTION_MAGASIN
-	-Id :ai
-	date
-	#matricule (medicament/materiel)
-	quantité
-	Magasin de depart
-	Magasin d'arriver
-	statut: boolean // indique si la transaction a été effectuer avec succes ou pas . 
 	
-31)CAISSE
-	-Id:ai
-	Nom
-	Description
+class TransactionMagasin(models.Model):
+	date = models.DateField()
+	matriculeObjetDeplace = models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
+	magasinDeDepart = models.CharField(max_length = 20)
+	magasinArrivee = models.CharField(max_length = 20)
+	status = models.CharField(max_length = 20)
+	def clean(self):
+		if not self.status or not (self.status == 0 or self.status == 1):
+			raise ValidationError("Le statut indique si la transaction a été effectuer avec succes (1) ou pas (0)")
 
-	
+class Caisse(models.Model):
+	nom = models.CharField(max_length = 20)
+	description = models.CharField(max_length = 100)
 
-32)HISTORIQUE_CAISSE 
-	-Id: int ai
-	#id caisse
-	#matricule caissiere(employé)
-	date_heure
-	Id_client_achat
-	#matricule (medicament/materiel)
-	quantité
-	prix
-	#Id facture
+class HistoriqueCaisse(models.Model):
+	idCaisse = models.ForeignKey(Caisse, on_delete=models.CASCADE)
+	matriculeCaissiere = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	date = models.DateField()
+	matriculeObjetAchete = models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
+	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
+	#Id photo facture pas de temps pour implementer
