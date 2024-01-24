@@ -68,14 +68,14 @@ class CategorieMedicament(models.Model):
 	nomCathegorie = models.CharField(max_length = 20)
 
 class Medicament(models.Model):
-	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	idMedicament =models.AutoField(primary_key=True, default="0")
 	idCategorie = models.ForeignKey(CategorieMedicament, on_delete=models.CASCADE)
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
 	prixUnitaireDeVente = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1000000)])
 
 class MedicamentPharmacie(models.Model):
-	matriculeMedicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
+	nomMedicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
 	quantite = models.CharField(max_length = 10000)
 	datePeremption = models.DateField()
 	commentaire = models.CharField(max_length = 100)
@@ -177,9 +177,11 @@ class Materiel(models.Model):
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
 
+class TypeAchat(models.Model):
+    nom=models.CharField(max_length =100)
 class Achat(models.Model):
-	motif = models.CharField(max_length = 20)
-	matriculeObjetAchete= models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	motif = models.CharField(max_length = 500)
+	type_Achat= models.ForeignKey(TypeAchat, on_delete=models.CASCADE)
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	date = models.DateField()
 	prixTotal = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])

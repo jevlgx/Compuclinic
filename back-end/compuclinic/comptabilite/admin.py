@@ -34,7 +34,8 @@ classes = [
     Stock,
     TransactionMagasin,
     Caisse,
-    HistoriqueCaisse
+    HistoriqueCaisse,
+    TypeAchat
 ]
 
 admin.site.register(classes)
