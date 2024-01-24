@@ -6,8 +6,8 @@ from django.db import models
 # Create your models here.
 # Les identifiants sont automatiquement generés par django
 class Poste(models.Model):
-	nom = models.CharField(max_length = 20)
-	particularite  = models.CharField(max_length = 20)
+	nom = models.CharField(max_length = 200)
+	particularite  = models.CharField(max_length = 100)
 
 class Personne(models.Model):
 	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
@@ -22,8 +22,8 @@ class Personne(models.Model):
 
 
 class Prime(models.Model):
-	type = models.CharField(max_length = 20)
-	description  = models.CharField(max_length = 20)
+	Nom = models.CharField(max_length = 200)
+	description  = models.CharField(max_length = 200)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
 	
 class PrimeEmploye(models.Model):
@@ -40,13 +40,15 @@ class HistoriquePaiementSalaire(models.Model):
 	
 class Don(models.Model):
 	date = models.DateField()
-	description = models.CharField(max_length = 20)
-	type = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1)])
-	def clean(self):
-		if not self.type or not (self.type == 0 or self.type == 1):
-			raise ValidationError("La date doit être égale à a ou b.")
+	description = models.CharField(max_length = 500)
+	choix = [('0', 'Espece'),('1', 'materiel')]
+	typeDeDon = models.CharField(max_length=1, choices=choix, validators=[RegexValidator(r'^[0-1]$', 'La catégorie doit être comprise entre 0 et 3.')])
+	
 	somme = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	destination = models.CharField(max_length = 20)
+	def __str__(self):
+                      return "{} {} {} {} {}".format(self.date, self.description, self.typeDeDon, self.somme, self.destination)
+
 
 class DonPersonne(models.Model):
 	idDon = models.ForeignKey(Don, on_delete=models.CASCADE)
@@ -65,10 +67,12 @@ class Action(models.Model):
 	dateDebut = models.DateField()
 
 class CategorieMedicament(models.Model):
-	nomCathegorie = models.CharField(max_length = 20)
+	nomCathegorie = models.CharField(max_length = 50)
+	def __str__(self):
+                      return self.nomCathegorie
 
 class Medicament(models.Model):
-	idMedicament =models.AutoField(primary_key=True, default="0")
+	MatriculeMedicament =models.AutoField(primary_key=True, default="0")
 	idCategorie = models.ForeignKey(CategorieMedicament, on_delete=models.CASCADE)
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
@@ -82,7 +86,7 @@ class MedicamentPharmacie(models.Model):
 	
 class Consultation(models.Model):
 	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
-	type = models.CharField(max_length = 20)
+	NomConsultation = models.CharField(max_length = 20)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
 	commentaires = models.CharField(max_length = 100)
 
@@ -95,7 +99,8 @@ class HistoriqueConsultation(models.Model):
 
 class ChambreInternement(models.Model):
 	numeroChambre = models.IntegerField(primary_key=True ,validators=[MinValueValidator(0), MaxValueValidator(9999)])
-	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
+	prixDuLit = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
+	
 	
 	standard_choices = [
         ('0', 'Classique'),
@@ -109,8 +114,10 @@ class ChambreInternement(models.Model):
 	
 	capacite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	description = models.CharField(max_length = 100)
-	service = models.CharField(max_length = 100)
-
+	
+	def __str__(self):
+     
+    					return "{} {} {} {} {}".format(self.numeroChambre, self.prixDuLit, self.standard, self.capacite, self.description)
 class Internement(models.Model):
 	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
 	numeroChambre = models.ForeignKey(ChambreInternement, on_delete=models.CASCADE)
@@ -123,7 +130,9 @@ class Examen(models.Model):
 	nom = models.CharField(max_length = 100)
 	description = models.CharField(max_length = 100)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999999)])
-	
+	def __str__(self):
+                      return "{} {} {}".format(self.nom, self.description, self.prix)
+
 class HistoriqueExamenEffectue(models.Model):
 	idExamen = models.ForeignKey(Examen, on_delete=models.CASCADE)
 	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
@@ -135,6 +144,8 @@ class Operation(models.Model):
 	nom = models.CharField(max_length = 100)
 	description = models.CharField(max_length = 100)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999999)])
+	def __str__(self):
+                      return "{} {} {}".format(self.nom, self.description, self.prix)
 
 class HistoriqueOpererationEffectue(models.Model):
 	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
@@ -149,13 +160,14 @@ class Impot(models.Model):
 	nom = models.CharField(max_length = 100)
 	description = models.CharField(max_length = 100)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999999)])
-	porcentage = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
+	pourcentage = models.DecimalField(max_digits=5, decimal_places=2,validators=[MinValueValidator(0), MaxValueValidator(100)])
 
 class HistoriqueImpotPaye(models.Model):
 	idImpot = models.ForeignKey(Impot, on_delete=models.CASCADE)
 	#Id photo facture pas de temps pour implementer
 	date = models.DateField()
 
+    
 class Depense(models.Model):
 	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
 	nom = models.CharField(max_length = 20)
@@ -188,7 +200,7 @@ class Achat(models.Model):
 	#Id photo facture pas de temps pour implementer
 
 class Stock(models.Model):
-	motif = models.CharField(max_length = 20)
+	nomProduit = models.CharField(max_length = 20)
 	matriculeObjetStocke= models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	datePeremption = models.DateField()
