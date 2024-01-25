@@ -42,8 +42,8 @@ classes = [
     investisseur,
     Donnateur,
     patient,
-    CategorieObjetMedical,
-    ObjetMedical
+    CategorieObjetMedicaux,
+    ObjetMedicaux
     
 ]
 

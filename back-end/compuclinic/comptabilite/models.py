@@ -9,7 +9,10 @@ from django.db import models
 
 class Poste(models.Model):
 	nom = models.CharField(max_length = 200)
-	particularite  = models.CharField(max_length = 100)
+	particularite  = models.CharField(max_length = 100, blank=True)
+	def __str__(self):
+                      return "{} {}".format(self.nom, self.particularite)
+
 
 class Personne(models.Model):
 	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 8 caractères.')])
@@ -34,23 +37,27 @@ class fournisseur(Personne):
 	adresse_entreprise = models.CharField(max_length=100,default="none")
 	numero_siret_entreprise = models.CharField(max_length=14,default="none")
 	def __str__(self):
-                      return "{} ".format(self.idfournisseur)
+                      return "{} {} ".format(self.idfournisseur,self.nom)
 
 
 class actionnaire(Personne):
     nombreTotal_d_action=models.IntegerField(default=0)
     def __str__(self):
-                      return "{} ".format(self.nombreTotal_d_action)
+                      return "{} {} ".format(self.matricule,self.nom)
 
 class investisseur(Personne):
    nombreTotal_d_investissement = models.IntegerField(default=0)
    nombreSessionCourante = models.IntegerField(default=0) #il s'agit du nombre de investissement en cours de cette personne dans cet hopital . 
-
+   def __str__(self):
+                      return "{} {} ".format(self.matricule,self.nom)
 class Donnateur(Personne):
     nombreTotalDeDonnation=models.IntegerField(default=0)
-    
+    def __str__(self):
+                      return "{} {} ".format(self.matricule,self.nom)
 class patient(Personne):
 	specificité=models.CharField(blank=True, max_length=200)
+	def __str__(self):
+                      return "{} {} ".format(self.matricule,self.nom)
 class Prime(models.Model):
 	Nom = models.CharField(max_length = 200)
 	description  = models.CharField(max_length = 200)
@@ -74,7 +81,7 @@ class Don(models.Model):
 	choix = [('0', 'Espece'),('1', 'materiel')]
 	typeDeDon = models.CharField(max_length=1, choices=choix, validators=[RegexValidator(r'^[0-1]$', 'La catégorie doit être comprise entre 0 et 3.')])
 	somme = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
-	destination = models.CharField(max_length = 20)
+	destination = models.CharField(max_length = 20,blank = True)
 	def __str__(self):
                       return "{} {} {} {} {}".format(self.date, self.description, self.typeDeDon, self.somme, self.destination)
 
@@ -82,6 +89,8 @@ class Don(models.Model):
 class DonPersonne(models.Model):
 	idDon = models.ForeignKey(Don, on_delete=models.CASCADE)
 	matriculeDonateur = models.ForeignKey(Donnateur, on_delete=models.CASCADE)
+	def __str__(self):
+                      return "{} {}".format(self.idDon, self.matriculeDonateur)
 
 class Investissement(models.Model):
 	matriculeInvestisseur = models.ForeignKey(investisseur, on_delete=models.CASCADE)
@@ -91,20 +100,27 @@ class Investissement(models.Model):
 	dateFin = models.DateField()
 	
 class Action(models.Model):
-	matriculeActionnaire = models.ForeignKey(actionnaire, on_delete=models.CASCADE)
+	matriculeActionnaire = models.OneToOneField(actionnaire, primary_key=True, on_delete=models.CASCADE)
 	nombreActions = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)])
 	dateDebut = models.DateField()
-class CategorieObjetMedical(models.Model):
+	def __str__(self):
+                      return "{} {}".format(self.matriculeActionnaire,self.nombreActions)
+
+class CategorieObjetMedicaux(models.Model):
      nomCategorie = models.CharField(max_length = 50)
      def __str__(self):
-                      return self.nomCathegorie
+                      return self.nomCategorie
 
-class ObjetMedical(models.Model):
+class ObjetMedicaux(models.Model):
     matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 8 caractères.')])
-    idCategorie = models.ForeignKey(CategorieObjetMedical, on_delete=models.CASCADE)
+    idCategorie = models.ForeignKey(CategorieObjetMedicaux, on_delete=models.CASCADE)
     nom = models.CharField(max_length = 20)
     description = models.CharField(max_length = 100)
     prixUnitaireDeVente = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1000000)])
+    def __str__(self):
+     
+    					return "{} ".format(self.nom)
+
 
 class CategorieMedicament(models.Model):
 	nomCategorie = models.CharField(max_length = 50)
@@ -156,7 +172,7 @@ class ChambreInternement(models.Model):
     ])
 	
 	capacite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
-	description = models.CharField(max_length = 100)
+	description = models.CharField(max_length = 100 , blank=True)
 	
 	def __str__(self):
      
@@ -241,12 +257,11 @@ class TypeAchat(models.Model):#achat de medicament , appareil ...
 class Achat(models.Model):
 	date = models.DateField()
 	motif = models.CharField(max_length = 500)
-	nomProduit=models.CharField(max_length=500)
 	type_Achat= models.ForeignKey(TypeAchat, on_delete=models.CASCADE)
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	prixTotal = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	#Id photo facture pas de temps pour implementer
-	
+	nomProduit=models.CharField(max_length=500)
 class magasin(models.Model):
     idMagasin = models.IntegerField(primary_key=True)
     localisation=models.CharField(max_length=200)
@@ -272,6 +287,8 @@ class TransactionMagasin(models.Model):
 class Caisse(models.Model):
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
+	def __str__(self):
+                      return "{} {}".format(self.nom,self.description)
 
 class HistoriqueCaisse(models.Model):
 	idCaisse = models.ForeignKey(Caisse, on_delete=models.CASCADE)
