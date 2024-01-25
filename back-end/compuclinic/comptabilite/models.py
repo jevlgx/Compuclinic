@@ -26,10 +26,10 @@ class Personne(models.Model):
 
 	
 class employée(Personne):
-    idPoste = models.ForeignKey(Poste, on_delete=models.CASCADE)
+    idPoste = models.OneToOneField(Poste, on_delete=models.CASCADE)
     salaireDeBase = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
     def __str__(self):
-                      return "{} {} ".format(self.idPoste, self.salaireDeBase)
+                      return "{} {} {} ".format(self.idPoste, self.salaireDeBase,self.nom)
 
 class fournisseur(Personne):
 	
@@ -185,13 +185,16 @@ class Internement(models.Model):
 	dateFin = models.DateField()
 	commentaire = models.CharField(max_length = 1000)
 
+class TypeExamen(models.Model):
+    nom = models.CharField(max_length =200,default="none")
 class Examen(models.Model):
 	nom = models.CharField(max_length = 100)
 	description = models.CharField(max_length = 100)
+	
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999999)])
 	def __str__(self):
                       return "{} {} {}".format(self.nom, self.description, self.prix)
-
+    
 class HistoriqueExamenEffectue(models.Model):
 	idExamen = models.ForeignKey(Examen, on_delete=models.CASCADE)
 	matriculePatient = models.ForeignKey(patient, on_delete=models.CASCADE)

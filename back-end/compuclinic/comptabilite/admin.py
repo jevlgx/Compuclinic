@@ -43,7 +43,8 @@ classes = [
     Donnateur,
     patient,
     CategorieObjetMedicaux,
-    ObjetMedicaux
+    ObjetMedicaux,
+    TypeExamen
     
 ]
 
