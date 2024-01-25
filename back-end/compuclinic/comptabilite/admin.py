@@ -15,7 +15,7 @@ classes = [
     CategorieMedicament,
     Medicament,
     MedicamentPharmacie,
-    Consultation,
+    TypeConsultation,
     HistoriqueConsultation,
     ChambreInternement,
     Internement,
@@ -26,12 +26,12 @@ classes = [
     ParticipationOperation,
     Impot,
     HistoriqueImpotPaye,
-    Depense,
+    TypeDepense,
     HistoriqueDepense,
     TypeMateriel,
     Materiel,
     Achat,
-    Stock,
+    InventaireStock,
     TransactionMagasin,
     Caisse,
     HistoriqueCaisse,
@@ -40,7 +40,10 @@ classes = [
     fournisseur,
     actionnaire,
     investisseur,
-    Donnateur
+    Donnateur,
+    patient,
+    CategorieObjetMedical,
+    ObjetMedical
     
 ]
 

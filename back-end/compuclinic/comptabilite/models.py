@@ -48,6 +48,9 @@ class investisseur(Personne):
 
 class Donnateur(Personne):
     nombreTotalDeDonnation=models.IntegerField(default=0)
+    
+class patient(Personne):
+	specificité=models.CharField(null=True, max_length=200)
 class Prime(models.Model):
 	Nom = models.CharField(max_length = 200)
 	description  = models.CharField(max_length = 200)
@@ -55,7 +58,7 @@ class Prime(models.Model):
 	
 class PrimeEmploye(models.Model):
 	idPrime = models.ForeignKey(Prime, on_delete=models.CASCADE)
-	matriculeEmploye = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeEmploye = models.ForeignKey(employée, on_delete=models.CASCADE)
 	date = models.DateField()
 	commentaire = models.CharField(max_length = 20)
 
@@ -70,7 +73,6 @@ class Don(models.Model):
 	description = models.CharField(max_length = 500)
 	choix = [('0', 'Espece'),('1', 'materiel')]
 	typeDeDon = models.CharField(max_length=1, choices=choix, validators=[RegexValidator(r'^[0-1]$', 'La catégorie doit être comprise entre 0 et 3.')])
-	
 	somme = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	destination = models.CharField(max_length = 20)
 	def __str__(self):
@@ -92,18 +94,29 @@ class Action(models.Model):
 	matriculeActionnaire = models.ForeignKey(actionnaire, on_delete=models.CASCADE)
 	nombreActions = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)])
 	dateDebut = models.DateField()
-
-class CategorieMedicament(models.Model):
-	nomCathegorie = models.CharField(max_length = 50)
-	def __str__(self):
+class CategorieObjetMedical(models.Model):
+     nomCategorie = models.CharField(max_length = 50)
+     def __str__(self):
                       return self.nomCathegorie
 
+class ObjetMedical(models.Model):
+    matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 8 caractères.')])
+    idCategorie = models.ForeignKey(CategorieObjetMedical, on_delete=models.CASCADE)
+    nom = models.CharField(max_length = 20)
+    description = models.CharField(max_length = 100)
+    prixUnitaireDeVente = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1000000)])
+
+class CategorieMedicament(models.Model):
+	nomCategorie = models.CharField(max_length = 50)
+	def __str__(self):
+                      return self.nomCategorie
+
 class Medicament(models.Model):
-	MatriculeMedicament =models.AutoField(primary_key=True, default="0")
-	idCategorie = models.ForeignKey(CategorieMedicament, on_delete=models.CASCADE)
-	nom = models.CharField(max_length = 20)
-	description = models.CharField(max_length = 100)
-	prixUnitaireDeVente = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1000000)])
+    matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 8 caractères.')])
+    idCategorie = models.ForeignKey(CategorieMedicament, on_delete=models.CASCADE)
+    nom = models.CharField(max_length = 20)
+    description = models.CharField(max_length = 100)
+    prixUnitaireDeVente = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(1000000)])
 
 class MedicamentPharmacie(models.Model):
 	nomMedicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
@@ -111,16 +124,19 @@ class MedicamentPharmacie(models.Model):
 	datePeremption = models.DateField()
 	commentaire = models.CharField(max_length = 100)
 	
-class Consultation(models.Model):
-	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')])
+class TypeConsultation(models.Model):
+	matricule = models.AutoField(primary_key = True)
 	NomConsultation = models.CharField(max_length = 20)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
 	commentaires = models.CharField(max_length = 100)
 
 class HistoriqueConsultation(models.Model):
-	matriculePatient = models.ForeignKey(Personne,related_name='matriculePatientHistoriqueConsultation', on_delete=models.CASCADE)
+	matriculePatient = models.ForeignKey(patient,related_name='matriculePatientHistoriqueConsultation', on_delete=models.CASCADE)
 	matriculeMedecin = models.ForeignKey(Personne,related_name='matriculeMedecinHistoriqueConsultation', on_delete=models.CASCADE)
-	MatriculeConsultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+	MatriculeConsultation = models.ForeignKey(TypeConsultation, on_delete=models.CASCADE)
+	age=models.IntegerField(null=True)
+	poid=models.IntegerField(null=True)
+	descriptionSymptom=models.TextField(blank=True)
 	diagnostique = models.CharField(max_length = 1000)
 	date = models.DateField() 
 
@@ -146,7 +162,7 @@ class ChambreInternement(models.Model):
      
     					return "{} {} {} {} {}".format(self.numeroChambre, self.prixDuLit, self.standard, self.capacite, self.description)
 class Internement(models.Model):
-	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculePatient = models.ForeignKey(patient, on_delete=models.CASCADE)
 	numeroChambre = models.ForeignKey(ChambreInternement, on_delete=models.CASCADE)
 	numeroLit = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	dateDebut = models.DateField()
@@ -162,7 +178,7 @@ class Examen(models.Model):
 
 class HistoriqueExamenEffectue(models.Model):
 	idExamen = models.ForeignKey(Examen, on_delete=models.CASCADE)
-	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculePatient = models.ForeignKey(patient, on_delete=models.CASCADE)
 	dateDepot = models.DateField()
 	dateRetrait = models.DateField()
 	resultat = models.CharField(max_length = 100)
@@ -173,15 +189,16 @@ class Operation(models.Model):
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(999999)])
 	def __str__(self):
                       return "{} {} {}".format(self.nom, self.description, self.prix)
+class ParticipationOperation(models.Model):
+	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
+	matriculeEmployé = models.ForeignKey(employée, on_delete=models.CASCADE)
 
 class HistoriqueOpererationEffectue(models.Model):
 	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
-	matriculePatient = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculePatient = models.ForeignKey(patient, on_delete=models.CASCADE)
 	date = models.DateField()
+	resultat=models.TextField(blank=True)
 
-class ParticipationOperation(models.Model):
-	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
-	matriculeMedecin = models.ForeignKey(Personne, on_delete=models.CASCADE)
 
 class Impot(models.Model):
 	nom = models.CharField(max_length = 100)
@@ -195,20 +212,20 @@ class HistoriqueImpotPaye(models.Model):
 	date = models.DateField()
 
     
-class Depense(models.Model):
+class TypeDepense(models.Model):#depense de roulement pour eau , electricité ..
 	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')])
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
 
 class HistoriqueDepense(models.Model):
-	matriculeDepense = models.ForeignKey(Depense, on_delete=models.CASCADE)
+	matriculeDepense = models.ForeignKey(TypeDepense, on_delete=models.CASCADE)
 	date = models.DateField()
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
 	commentaire = models.CharField(max_length = 100)
 	#Id photo facture pas de temps pour implementer
 
 class TypeMateriel(models.Model):
-	nom = models.CharField(max_length = 20)
+	nom = models.CharField(max_length = 200)
 	description = models.CharField(max_length = 100)
 	
 class Materiel(models.Model):
@@ -216,29 +233,32 @@ class Materiel(models.Model):
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
 
-class TypeAchat(models.Model):
+class TypeAchat(models.Model):#achat de medicament , appareil ...
     nom=models.CharField(max_length =100)
     def __str__(self):
                       return "{} ".format(self.nom)
 
 class Achat(models.Model):
-	motif = models.CharField(max_length = 500)
+	date = models.DateField()
+	nomProduit = models.CharField(max_length = 500)
 	type_Achat= models.ForeignKey(TypeAchat, on_delete=models.CASCADE)
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
-	date = models.DateField()
 	prixTotal = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	#Id photo facture pas de temps pour implementer
-
-class Stock(models.Model):
-	nomProduit = models.CharField(max_length = 20)
-	matriculeObjetStocke= models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+class magasin(models.Model):
+    idMagasin = models.IntegerField(primary_key=True)
+    localisation=models.CharField(max_length=200)
+class InventaireStock(models.Model):
+	nomProduit = models.CharField(max_length = 200)
+	matriculeObjetStocke = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')]) 
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	datePeremption = models.DateField()
 	commentaire = models.CharField(max_length = 20)
+	idMagasin=models.ForeignKey(magasin , on_delete=models.CASCADE)
 	
 class TransactionMagasin(models.Model):
 	date = models.DateField()
-	matriculeObjetDeplace = models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	matriculeObjetDeplace = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')]) 
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	magasinDeDepart = models.CharField(max_length = 20)
 	magasinArrivee = models.CharField(max_length = 20)
@@ -253,9 +273,10 @@ class Caisse(models.Model):
 
 class HistoriqueCaisse(models.Model):
 	idCaisse = models.ForeignKey(Caisse, on_delete=models.CASCADE)
-	matriculeCaissiere = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeCaissiere = models.ForeignKey(employée, on_delete=models.CASCADE)
 	date = models.DateField()
-	matriculeObjetAchete = models.IntegerField(validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	matriculeObjetAchete = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')]) 
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	#Id photo facture pas de temps pour implementer
+ 
