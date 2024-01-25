@@ -12,7 +12,7 @@ class Poste(models.Model):
 	particularite  = models.CharField(max_length = 100)
 
 class Personne(models.Model):
-	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 6 caractères.')])
+	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 8 caractères.')])
 	nom  = models.CharField(max_length = 200)
 	tel = models.IntegerField(validators=[MinValueValidator(600000000), MaxValueValidator(699999999)])
 	cni  = models.CharField(max_length = 20)
@@ -30,24 +30,24 @@ class employée(Personne):
 
 class fournisseur(Personne):
 	
-	entreprise = models.CharField(max_length=200)
-	adresse_entreprise = models.CharField(max_length=100)
-	numero_siret_entreprise = models.CharField(max_length=14)
+	entreprise = models.CharField(max_length=200,default="none")
+	adresse_entreprise = models.CharField(max_length=100,default="none")
+	numero_siret_entreprise = models.CharField(max_length=14,default="none")
 	def __str__(self):
                       return "{} ".format(self.idfournisseur)
 
 
 class actionnaire(Personne):
-    nombreTotal_d_action=models.IntegerField()
+    nombreTotal_d_action=models.IntegerField(default=0)
     def __str__(self):
                       return "{} ".format(self.nombreTotal_d_action)
 
 class investisseur(Personne):
-   nombreTotal_d_investissement = models.IntegerField()
-   nombreSessionCourante = models.IntegerField() #il s'agit du nombre de investissement en cours de cette personne dans cet hopital . 
+   nombreTotal_d_investissement = models.IntegerField(default=0)
+   nombreSessionCourante = models.IntegerField(default=0) #il s'agit du nombre de investissement en cours de cette personne dans cet hopital . 
 
 class Donnateur(Personne):
-    nombreTotalDeDonnation=models.IntegerField()
+    nombreTotalDeDonnation=models.IntegerField(default=0)
 class Prime(models.Model):
 	Nom = models.CharField(max_length = 200)
 	description  = models.CharField(max_length = 200)
