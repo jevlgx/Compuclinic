@@ -35,7 +35,13 @@ classes = [
     TransactionMagasin,
     Caisse,
     HistoriqueCaisse,
-    TypeAchat
+    TypeAchat,
+    employée,
+    fournisseur,
+    actionnaire,
+    investisseur,
+    Donnateur
+    
 ]
 
 admin.site.register(classes)

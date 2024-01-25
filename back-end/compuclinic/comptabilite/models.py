@@ -5,22 +5,49 @@ from django.db import models
 
 # Create your models here.
 # Les identifiants sont automatiquement generés par django
+
+
 class Poste(models.Model):
 	nom = models.CharField(max_length = 200)
 	particularite  = models.CharField(max_length = 100)
 
 class Personne(models.Model):
-	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
-	idPoste = models.ForeignKey(Poste, on_delete=models.CASCADE)
-	nom  = models.CharField(max_length = 20)
+	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$', 'Le champ doit contenir exactement 6 caractères.')])
+	nom  = models.CharField(max_length = 200)
 	tel = models.IntegerField(validators=[MinValueValidator(600000000), MaxValueValidator(699999999)])
 	cni  = models.CharField(max_length = 20)
 	email = models.CharField(max_length = 160)
 	adresse = models.CharField(max_length = 100)
-	commentaire = models.CharField(max_length = 100)
-	salaireDeBase = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
+	def __str__(self):
+                      return "{} {} {} {} {} {}".format(self.matricule, self.nom, self.tel, self.cni, self.email, self.adresse)
+
+	
+class employée(Personne):
+    idPoste = models.ForeignKey(Poste, on_delete=models.CASCADE)
+    salaireDeBase = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
+    def __str__(self):
+                      return "{} {} ".format(self.idPoste, self.salaireDeBase)
+
+class fournisseur(Personne):
+	
+	entreprise = models.CharField(max_length=200)
+	adresse_entreprise = models.CharField(max_length=100)
+	numero_siret_entreprise = models.CharField(max_length=14)
+	def __str__(self):
+                      return "{} ".format(self.idfournisseur)
 
 
+class actionnaire(Personne):
+    nombreTotal_d_action=models.IntegerField()
+    def __str__(self):
+                      return "{} ".format(self.nombreTotal_d_action)
+
+class investisseur(Personne):
+   nombreTotal_d_investissement = models.IntegerField()
+   nombreSessionCourante = models.IntegerField() #il s'agit du nombre de investissement en cours de cette personne dans cet hopital . 
+
+class Donnateur(Personne):
+    nombreTotalDeDonnation=models.IntegerField()
 class Prime(models.Model):
 	Nom = models.CharField(max_length = 200)
 	description  = models.CharField(max_length = 200)
@@ -33,7 +60,7 @@ class PrimeEmploye(models.Model):
 	commentaire = models.CharField(max_length = 20)
 
 class HistoriquePaiementSalaire(models.Model):
-	matriculeEmploye = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeEmploye = models.ForeignKey(employée, on_delete=models.CASCADE)
 	sommePercue = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
 	date = models.DateField()
     # on a pas le temps pour gerer les photos de buletin de paie
@@ -52,17 +79,17 @@ class Don(models.Model):
 
 class DonPersonne(models.Model):
 	idDon = models.ForeignKey(Don, on_delete=models.CASCADE)
-	matriculeDonateur = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeDonateur = models.ForeignKey(Donnateur, on_delete=models.CASCADE)
 
 class Investissement(models.Model):
-	matriculeInvestisseur = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeInvestisseur = models.ForeignKey(investisseur, on_delete=models.CASCADE)
 	somme = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	pourcentage = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5000)])
 	dateDebut = models.DateField()
 	dateFin = models.DateField()
 	
 class Action(models.Model):
-	matriculeActionnaire = models.ForeignKey(Personne, on_delete=models.CASCADE)
+	matriculeActionnaire = models.ForeignKey(actionnaire, on_delete=models.CASCADE)
 	nombreActions = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)])
 	dateDebut = models.DateField()
 
@@ -85,7 +112,7 @@ class MedicamentPharmacie(models.Model):
 	commentaire = models.CharField(max_length = 100)
 	
 class Consultation(models.Model):
-	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')])
 	NomConsultation = models.CharField(max_length = 20)
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
 	commentaires = models.CharField(max_length = 100)
@@ -169,7 +196,7 @@ class HistoriqueImpotPaye(models.Model):
 
     
 class Depense(models.Model):
-	matricule = models.IntegerField(primary_key=True ,validators=[MinValueValidator(10000000), MaxValueValidator(99999999)])
+	matricule = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')])
 	nom = models.CharField(max_length = 20)
 	description = models.CharField(max_length = 100)
 
@@ -191,6 +218,9 @@ class Materiel(models.Model):
 
 class TypeAchat(models.Model):
     nom=models.CharField(max_length =100)
+    def __str__(self):
+                      return "{} ".format(self.nom)
+
 class Achat(models.Model):
 	motif = models.CharField(max_length = 500)
 	type_Achat= models.ForeignKey(TypeAchat, on_delete=models.CASCADE)
