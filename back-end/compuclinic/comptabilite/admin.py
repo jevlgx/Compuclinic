@@ -19,6 +19,7 @@ classes = [
     HistoriqueConsultation,
     ChambreInternement,
     Internement,
+    TypeExamen,
     Examen,
     HistoriqueExamenEffectue,
     Operation,
@@ -42,8 +43,9 @@ classes = [
     investisseur,
     Donnateur,
     patient,
-    CategorieObjetMedical,
-    ObjetMedical
+    CategorieObjetMedicaux,
+    ObjetMedicaux,
+    
     
 ]
 
