@@ -50,7 +50,7 @@ class Donnateur(Personne):
     nombreTotalDeDonnation=models.IntegerField(default=0)
     
 class patient(Personne):
-	specificité=models.CharField(null=True, max_length=200)
+	specificité=models.CharField(blank=True, max_length=200)
 class Prime(models.Model):
 	Nom = models.CharField(max_length = 200)
 	description  = models.CharField(max_length = 200)
