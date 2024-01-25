@@ -240,11 +240,13 @@ class TypeAchat(models.Model):#achat de medicament , appareil ...
 
 class Achat(models.Model):
 	date = models.DateField()
-	nomProduit = models.CharField(max_length = 500)
+	motif = models.CharField(max_length = 500)
+	nomProduit=models.CharField(max_length=500)
 	type_Achat= models.ForeignKey(TypeAchat, on_delete=models.CASCADE)
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	prixTotal = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	#Id photo facture pas de temps pour implementer
+	
 class magasin(models.Model):
     idMagasin = models.IntegerField(primary_key=True)
     localisation=models.CharField(max_length=200)
