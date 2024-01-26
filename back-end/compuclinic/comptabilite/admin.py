@@ -37,7 +37,7 @@ classes = [
     Caisse,
     HistoriqueCaisse,
     TypeAchat,
-    employée,
+    Employe,
     fournisseur,
     actionnaire,
     investisseur,
@@ -45,6 +45,8 @@ classes = [
     patient,
     CategorieObjetMedicaux,
     ObjetMedicaux,
+    Creancier,
+    Dette
     
     
 ]

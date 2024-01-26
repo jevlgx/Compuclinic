@@ -25,31 +25,35 @@ class Personne(models.Model):
                       return "{} {} {} {} {} {}".format(self.matricule, self.nom, self.tel, self.cni, self.email, self.adresse)
 
 	
-class employée(Personne):
+class Employe(Personne):
     idPoste = models.OneToOneField(Poste, on_delete=models.CASCADE)
     salaireDeBase = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
+    modalite_de_paiement=models.CharField(max_length=500)
     def __str__(self):
-                      return "{} {} {} ".format(self.idPoste, self.salaireDeBase,self.nom)
+                      return "{} {} {} {} ".format(self.idPoste, self.salaireDeBase,self.nom,self.modalite_de_paiement)
 
 class fournisseur(Personne):
 	
 	entreprise = models.CharField(max_length=200,default="none")
 	adresse_entreprise = models.CharField(max_length=100,default="none")
 	numero_siret_entreprise = models.CharField(max_length=14,default="none")
+	modalite_de_paiement=models.CharField(max_length =500,blank=True)
 	def __str__(self):
-                      return "{} {} ".format(self.idfournisseur,self.nom)
+                      return "{} {} {} ".format(self.idfournisseur,self.nom,self.modalite_de_paiement)
 
 
 class actionnaire(Personne):
     nombreTotal_d_action=models.IntegerField(default=0)
+    modalite_de_paiement=models.CharField(max_length =500,blank=True)
     def __str__(self):
-                      return "{} {} ".format(self.matricule,self.nom)
+                      return "{} {} {} ".format(self.matricule,self.nom,self.modalite_de_paiement)
 
 class investisseur(Personne):
    nombreTotal_d_investissement = models.IntegerField(default=0)
    nombreSessionCourante = models.IntegerField(default=0) #il s'agit du nombre de investissement en cours de cette personne dans cet hopital . 
+   modalite_de_paiement=models.CharField(max_length =500,blank=True)
    def __str__(self):
-                      return "{} {} ".format(self.matricule,self.nom)
+                      return "{} {} {} ".format(self.matricule,self.nom,self.modalite_de_paiement)
 class Donnateur(Personne):
     nombreTotalDeDonnation=models.IntegerField(default=0)
     def __str__(self):
@@ -65,12 +69,12 @@ class Prime(models.Model):
 	
 class PrimeEmploye(models.Model):
 	idPrime = models.ForeignKey(Prime, on_delete=models.CASCADE)
-	matriculeEmploye = models.ForeignKey(employée, on_delete=models.CASCADE)
+	matriculeEmploye = models.ForeignKey(Employe, on_delete=models.CASCADE)
 	date = models.DateField()
 	commentaire = models.CharField(max_length = 20)
 
 class HistoriquePaiementSalaire(models.Model):
-	matriculeEmploye = models.ForeignKey(employée, on_delete=models.CASCADE)
+	matriculeEmploye = models.ForeignKey(Employe, on_delete=models.CASCADE)
 	sommePercue = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999999)])
 	date = models.DateField()
     # on a pas le temps pour gerer les photos de buletin de paie
@@ -186,7 +190,6 @@ class Internement(models.Model):
 	commentaire = models.CharField(max_length = 1000)
 
 class TypeExamen(models.Model):
-    idTypeExamen = models.IntegerField(primary_key=True)
     nom = models.CharField(max_length =200,default="none")
 class Examen(models.Model):
 	categorieExamen=models.ForeignKey(TypeExamen,on_delete=models.CASCADE) #un problème persite
@@ -212,7 +215,7 @@ class Operation(models.Model):
                       return "{} {} {}".format(self.nom, self.description, self.prix)
 class ParticipationOperation(models.Model):
 	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
-	matriculeEmployé = models.ForeignKey(employée, on_delete=models.CASCADE)
+	matriculeEmployé = models.ForeignKey(Employe, on_delete=models.CASCADE)
 
 class HistoriqueOpererationEffectue(models.Model):
 	idOperation = models.ForeignKey(Operation, on_delete=models.CASCADE)
@@ -297,10 +300,29 @@ class Caisse(models.Model):
 
 class HistoriqueCaisse(models.Model):
 	idCaisse = models.ForeignKey(Caisse, on_delete=models.CASCADE)
-	matriculeCaissiere = models.ForeignKey(employée, on_delete=models.CASCADE)
+	matriculeCaissiere = models.ForeignKey(Employe, on_delete=models.CASCADE)
 	date = models.DateField()
 	matriculeObjetAchete = models.CharField(max_length=8, primary_key=True, validators=[RegexValidator(r'^.{8}$')]) 
 	quantite = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(9999)])
 	prix = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(99999999)])
 	#Id photo facture pas de temps pour implementer
- 
+
+class Creancier(Personne): #c'est la personne à qui on doit de l'argent 
+	methode_remboursement=models.CharField(max_length=500,blank=True) #le moyen par lequel il aimerai recevoir son argent
+	somme_totale_a_recevoir=models.IntegerField(default=0) #si une personne prete de l'argent plusieurs fois à l'hopital ou alors l'hopitam doit plusieurs fois à cette personne , ceci sera le montant total que l'hopital doit à la structure ou l'individu  
+	modalite_de_paiement=models.CharField(max_length =500,blank=True)
+	def __str__(self):
+						return "{} {} {} {} ".format(self.nom,self.methode_remboursement, self.somme_totale_a_recevoir,self.modalite_de_paiement)
+
+
+class Dette(models.Model):
+	Montant_dette=models.IntegerField(default=0)
+	idCreancier=models.ForeignKey(Creancier, on_delete=models.CASCADE)
+	Modalites_remboursement=models.TextField(blank=True)
+	Intéret=models.IntegerField(default=0) #ceci est en pourcentage , exemple , si je prete 100 je demande 12% d'interet sur les 100 xafs
+	MontantFixe=models.IntegerField()#ceci est en ajout fixe . exemple : si je prete 100 je demande à etre remburser 150 xaf . 
+	Date_debut=models.DateField( auto_now=False, auto_now_add=False) # date à laquelle la dette a commencée 
+	Date_fin=models.DateField( auto_now=False, auto_now_add=False) #date à la laquelle la dette s'est terminée
+	statut=models.BooleanField(default=True)#0=false pour dire que la dette a été reglée , 1=true pour dire que elle est toujours active et non reéglée
+	def __str__(self):
+		return "{} {} {} {} {} {} {}".format(self.idCreancier,self.Montant_dette,self.Intéret,self.MontantFixe,self.Date_debut,self.Date_fin,self.statut)
